@@ -4,6 +4,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const cities = [];
     const cityWeatherData = [];
 
+     // Add loading state
+    let isLoading = false;
+
 
     // reset cities
 
@@ -25,22 +28,19 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("submit", (event) => {
         event.preventDefault(); // prevent the form from refreshing the page
 
+        // Show loading
+        isLoading = true;
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = `
+            <div class="flex justify-center my-4">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-500"></div>
+            </div>
+        `;
+
         // get user inputs
 
         const location = document.getElementById("location").value;
         const radius = document.getElementById("radius").value;
-
-        // error handling for radius
-        if(radius.value < 0){
-            const resultsDiv = document.getElementById("results");
-            resultsDiv.innerHTML = `
-                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4  mb-4" role="alert">
-                    <p>Please enter a postive radius value.</p>
-                </div>
-            `;
-            return; // stop execution if radius is negative
-
-        }
 
         console.log("location", location);
 
@@ -137,7 +137,21 @@ document.addEventListener("DOMContentLoaded", () => {
     
 
     const fetchWeatherData = (lat, lon, locationName) => {
+
+        const fetchWeatherData = (lat, lon, locationName) => {
+            // Show loading in current-weather div
+            const currentWeatherDiv = document.getElementById("current-weather");
+            currentWeatherDiv.innerHTML = `
+                <div class="flex justify-center my-4">
+                    <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-500"></div>
+                </div>
+            `;
+        
         fetch(`https://weather-app-k2qd.onrender.com/weather?lat=${lat}&lon=${lon}`)
+
+
+
+        // fetch(`https://weather-app-k2qd.onrender.com/weather?lat=${lat}&lon=${lon}`)
             .then(response => response.json())
             .then(data => {
                 // Show current weather (optional)
@@ -148,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 
     
-                const currentWeatherDiv = document.getElementById("current-weather");
+                // const currentWeatherDiv = document.getElementById("current-weather");
                 console.log('Current weather div:', currentWeatherDiv);  // Debug log
 
                 currentWeatherDiv.innerHTML = `
@@ -170,7 +184,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // uses radius (boundingBox) to search for nearby locations
 
     const fetchNearbyLocations = (boundingBox, ) => {
+
+
+            // Show loading in results div
+        const resultsDiv = document.getElementById("results");
+        resultsDiv.innerHTML = `
+            <div class="flex justify-center my-4">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-orange-500"></div>
+            </div>
+        `;
+
         const {minLon, maxLat, maxLon, minLat} = boundingBox;
+        // const {minLon, maxLat, maxLon, minLat} = boundingBox;
 
         const apiUrl = `https://nominatim.openstreetmap.org/search?q=city&format=json&bounded=1&viewbox=${minLon},${maxLat},${maxLon},${minLat}&extratags=1&addressdetails=1&limit=50`;// best so far
 
@@ -285,8 +310,8 @@ document.addEventListener("DOMContentLoaded", () => {
         // Both columns
 
         shitColumn.className = notShitColumn.className = "w-96 min-h-[200px] p-4";
-        shitColumn.innerHTML = "<h3 class='text-xl font-bold mb-4 text-center'>Shit Cities (Rain)</h3>";
-        notShitColumn.innerHTML = "<h3 class='text-xl font-bold mb-4 text-center'>Not Shit Cities (No Rain)</h3>";
+        shitColumn.innerHTML = "<h3 class='text-xl font-bold mb-4 text-center'>👎 Rainy Cities</h3>";
+        notShitColumn.innerHTML = "<h3 class='text-xl font-bold mb-4 text-center'>👍 Rain-Free Cities</h3>";
         resultsDiv.appendChild(shitColumn);
         resultsDiv.appendChild(notShitColumn);
         } else if (shitCities.length > 0) {
@@ -294,7 +319,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Only rainy cities
 
         shitColumn.className = "w-full min-h-[200px] p-4";
-        shitColumn.innerHTML = `<h3 class='text-xl font-bold mb-4 text-center'>Shit Cities (Rain)</h3>
+        shitColumn.innerHTML = `<h3 class='text-xl font-bold mb-4 text-center'>👎 Rainy Cities</h3>
         <p class='text-center text-gray-600 italic mb-4'>Bad luck! Only rainy cities found!</p>`;
         resultsDiv.appendChild(shitColumn);
         } else {
@@ -302,7 +327,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Only non-rainy cities
 
         notShitColumn.className = "w-full min-h-[200px] p-4";
-        notShitColumn.innerHTML = `<h3 class='text-xl font-bold mb-4 text-center'>Not Shit Cities (No Rain)</h3>
+        notShitColumn.innerHTML = `<h3 class='text-xl font-bold mb-4 text-center'>👍 Rain-Free Cities</h3>
         <p class='text-center text-gray-600 italic mb-4'>Great News! No rainy cities found!</p>`;
         resultsDiv.appendChild(notShitColumn);
         }
